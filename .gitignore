@@ -36,5 +36,8 @@ x-ui.db
 # Ignore Docker specific files
 docker-compose.override.yml
 
+# Ignore SSL certificates directory (user-specific)
+cert/
+
 # Ignore .env (Environment Variables) file
 .env

@@ -1,0 +1,56 @@
+# Version control
+.git
+.github
+.gitignore
+
+# IDE and editor files
+.idea/
+.vscode/
+.cache/
+.cursor/
+*.swp
+*.swo
+*~
+
+# Documentation (not needed in image)
+*.md
+LICENSE
+
+# Docker files (prevent recursive includes)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Environment and secrets
+.env
+.env.*
+
+# Build artifacts and binaries
+bin/
+dist/
+release/
+main
+x-ui
+*.exe
+*.tar.gz
+
+# Runtime data (should be mounted as volumes)
+db/
+cert/
+logs/
+backup/
+x-ui.db
+
+# Node.js (if any)
+node_modules/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+.sync*
