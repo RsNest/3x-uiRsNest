@@ -18,6 +18,7 @@ import (
 type InboundController struct {
 	inboundService service.InboundService
 	xrayService    service.XrayService
+	settingService service.SettingService
 }
 
 // NewInboundController creates a new InboundController and sets up its routes.
@@ -52,6 +53,9 @@ func (a *InboundController) initRouter(g *gin.RouterGroup) {
 	g.POST("/lastOnline", a.lastOnline)
 	g.POST("/updateClientTraffic/:email", a.updateClientTraffic)
 	g.POST("/:id/delClientByEmail/:email", a.delInboundClientByEmail)
+
+	g.GET("/proxy-settings", a.getProxySettings)
+	g.POST("/proxy-settings", a.updateProxySettings)
 }
 
 // getInbounds retrieves the list of inbounds for the logged-in user.
@@ -453,4 +457,64 @@ func (a *InboundController) delInboundClientByEmail(c *gin.Context) {
 	if needRestart {
 		a.xrayService.SetToNeedRestart()
 	}
+}
+
+// proxySettingsResponse is the response structure for proxy chain settings API.
+type proxySettingsResponse struct {
+	Enabled         bool   `json:"enabled"`
+	ProxyAddress    string `json:"proxy_address"`
+	ProxyPort       int    `json:"proxy_port"`
+	OriginalAddress string `json:"original_address"`
+	OriginalPort    int    `json:"original_port"`
+}
+
+// getProxySettings retrieves the current proxy chain settings.
+func (a *InboundController) getProxySettings(c *gin.Context) {
+	enabled, _ := a.settingService.GetProxyChainEnable()
+	address, _ := a.settingService.GetProxyChainAddress()
+	port, _ := a.settingService.GetProxyChainPort()
+	origAddr, _ := a.settingService.GetProxyChainOriginalAddress()
+	origPort, _ := a.settingService.GetProxyChainOriginalPort()
+
+	result := proxySettingsResponse{
+		Enabled:         enabled,
+		ProxyAddress:    address,
+		ProxyPort:       port,
+		OriginalAddress: origAddr,
+		OriginalPort:    origPort,
+	}
+	jsonObj(c, result, nil)
+}
+
+// updateProxySettings updates the proxy chain settings.
+func (a *InboundController) updateProxySettings(c *gin.Context) {
+	var req proxySettingsResponse
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		jsonMsg(c, "Invalid proxy settings", err)
+		return
+	}
+
+	var errs []error
+	if err := a.settingService.SetProxyChainEnable(req.Enabled); err != nil {
+		errs = append(errs, err)
+	}
+	if err := a.settingService.SetProxyChainAddress(req.ProxyAddress); err != nil {
+		errs = append(errs, err)
+	}
+	if err := a.settingService.SetProxyChainPort(req.ProxyPort); err != nil {
+		errs = append(errs, err)
+	}
+	if err := a.settingService.SetProxyChainOriginalAddress(req.OriginalAddress); err != nil {
+		errs = append(errs, err)
+	}
+	if err := a.settingService.SetProxyChainOriginalPort(req.OriginalPort); err != nil {
+		errs = append(errs, err)
+	}
+
+	if len(errs) > 0 {
+		jsonMsg(c, "Failed to save some proxy settings", errs[0])
+		return
+	}
+	jsonMsg(c, "Proxy settings updated successfully", nil)
 }

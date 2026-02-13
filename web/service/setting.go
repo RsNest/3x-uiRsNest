@@ -81,6 +81,13 @@ var defaultValueMap = map[string]string{
 	"externalTrafficInformURI":    "",
 	"xrayOutboundTestUrl":         "https://www.google.com/generate_204",
 
+	// Proxy chain defaults
+	"proxyChainEnable":          "false",
+	"proxyChainAddress":         "",
+	"proxyChainPort":            "443",
+	"proxyChainOriginalAddress": "",
+	"proxyChainOriginalPort":    "443",
+
 	// LDAP defaults
 	"ldapEnable":            "false",
 	"ldapHost":              "",
@@ -575,6 +582,47 @@ func (s *SettingService) GetDatepicker() (string, error) {
 	return s.getString("datepicker")
 }
 
+// Proxy chain settings
+func (s *SettingService) GetProxyChainEnable() (bool, error) {
+	return s.getBool("proxyChainEnable")
+}
+
+func (s *SettingService) SetProxyChainEnable(value bool) error {
+	return s.setBool("proxyChainEnable", value)
+}
+
+func (s *SettingService) GetProxyChainAddress() (string, error) {
+	return s.getString("proxyChainAddress")
+}
+
+func (s *SettingService) SetProxyChainAddress(address string) error {
+	return s.setString("proxyChainAddress", address)
+}
+
+func (s *SettingService) GetProxyChainPort() (int, error) {
+	return s.getInt("proxyChainPort")
+}
+
+func (s *SettingService) SetProxyChainPort(port int) error {
+	return s.setInt("proxyChainPort", port)
+}
+
+func (s *SettingService) GetProxyChainOriginalAddress() (string, error) {
+	return s.getString("proxyChainOriginalAddress")
+}
+
+func (s *SettingService) SetProxyChainOriginalAddress(address string) error {
+	return s.setString("proxyChainOriginalAddress", address)
+}
+
+func (s *SettingService) GetProxyChainOriginalPort() (int, error) {
+	return s.getInt("proxyChainOriginalPort")
+}
+
+func (s *SettingService) SetProxyChainOriginalPort(port int) error {
+	return s.setInt("proxyChainOriginalPort", port)
+}
+
 func (s *SettingService) GetWarp() (string, error) {
 	return s.getString("warp")
 }
@@ -754,9 +802,14 @@ func (s *SettingService) GetDefaultSettings(host string) (any, error) {
 		"subTitle":      func() (any, error) { return s.GetSubTitle() },
 		"subURI":        func() (any, error) { return s.GetSubURI() },
 		"subJsonURI":    func() (any, error) { return s.GetSubJsonURI() },
-		"remarkModel":   func() (any, error) { return s.GetRemarkModel() },
-		"datepicker":    func() (any, error) { return s.GetDatepicker() },
-		"ipLimitEnable": func() (any, error) { return s.GetIpLimitEnable() },
+		"remarkModel":              func() (any, error) { return s.GetRemarkModel() },
+		"datepicker":               func() (any, error) { return s.GetDatepicker() },
+		"ipLimitEnable":            func() (any, error) { return s.GetIpLimitEnable() },
+		"proxyChainEnable":         func() (any, error) { return s.GetProxyChainEnable() },
+		"proxyChainAddress":        func() (any, error) { return s.GetProxyChainAddress() },
+		"proxyChainPort":           func() (any, error) { return s.GetProxyChainPort() },
+		"proxyChainOriginalAddress": func() (any, error) { return s.GetProxyChainOriginalAddress() },
+		"proxyChainOriginalPort":   func() (any, error) { return s.GetProxyChainOriginalPort() },
 	}
 
 	result := make(map[string]any)

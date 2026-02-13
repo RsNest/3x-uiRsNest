@@ -81,6 +81,13 @@ type AllSetting struct {
 	SubJsonMux                  string `json:"subJsonMux" form:"subJsonMux"`                                   // JSON subscription mux configuration
 	SubJsonRules                string `json:"subJsonRules" form:"subJsonRules"`
 
+	// Proxy chain settings
+	ProxyChainEnable          bool   `json:"proxyChainEnable" form:"proxyChainEnable"`                   // Enable proxy chain mode
+	ProxyChainAddress         string `json:"proxyChainAddress" form:"proxyChainAddress"`                 // Entry-point proxy server address (IP or domain)
+	ProxyChainPort            int    `json:"proxyChainPort" form:"proxyChainPort"`                       // Entry-point proxy server port
+	ProxyChainOriginalAddress string `json:"proxyChainOriginalAddress" form:"proxyChainOriginalAddress"` // This server's real address (for reference)
+	ProxyChainOriginalPort    int    `json:"proxyChainOriginalPort" form:"proxyChainOriginalPort"`       // This server's real port (for reference)
+
 	// LDAP settings
 	LdapEnable     bool   `json:"ldapEnable" form:"ldapEnable"`
 	LdapHost       string `json:"ldapHost" form:"ldapHost"`

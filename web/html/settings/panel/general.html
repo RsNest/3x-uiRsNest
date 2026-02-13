@@ -146,7 +146,54 @@
             </template>
         </a-setting-list-item>
     </a-collapse-panel>
-    <a-collapse-panel key="6" header='LDAP'>
+    <a-collapse-panel key="6" header='Proxy Chain Configuration'>
+        <a-alert v-if="allSetting.proxyChainEnable" type="success" show-icon
+            :style="{ marginBottom: '12px' }">
+            <template slot="message">
+                Proxy Mode is <b>ENABLED</b> — Clients will connect to <b>[[ allSetting.proxyChainAddress ]]:[[ allSetting.proxyChainPort ]]</b>
+            </template>
+        </a-alert>
+        <a-setting-list-item paddings="small">
+            <template #title>Enable Proxy Chain Mode</template>
+            <template #description>When enabled, subscription configs will use the entry-point proxy server address instead of this server's address. Traffic flow: Client → Proxy Server → This Server → Internet</template>
+            <template #control>
+                <a-switch v-model="allSetting.proxyChainEnable"></a-switch>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>Proxy Server Address (Entry Point)</template>
+            <template #description>IP address or domain of the entry-point proxy server that clients will connect to</template>
+            <template #control>
+                <a-input type="text" placeholder="e.g. proxy.example.com or 1.2.3.4"
+                    v-model="allSetting.proxyChainAddress" :disabled="!allSetting.proxyChainEnable"></a-input>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>Proxy Server Port</template>
+            <template #description>Port on the entry-point proxy server</template>
+            <template #control>
+                <a-input-number :min="1" :max="65535" v-model="allSetting.proxyChainPort"
+                    :disabled="!allSetting.proxyChainEnable" :style="{ width: '100%' }"></a-input-number>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>Original Server Address (This Server)</template>
+            <template #description>Real address of this server (for your reference, not used in client configs)</template>
+            <template #control>
+                <a-input type="text" placeholder="e.g. real-server.com"
+                    v-model="allSetting.proxyChainOriginalAddress" :disabled="!allSetting.proxyChainEnable"></a-input>
+            </template>
+        </a-setting-list-item>
+        <a-setting-list-item paddings="small">
+            <template #title>Original Server Port</template>
+            <template #description>Real port of this server (for your reference)</template>
+            <template #control>
+                <a-input-number :min="1" :max="65535" v-model="allSetting.proxyChainOriginalPort"
+                    :disabled="!allSetting.proxyChainEnable" :style="{ width: '100%' }"></a-input-number>
+            </template>
+        </a-setting-list-item>
+    </a-collapse-panel>
+    <a-collapse-panel key="7" header='LDAP'>
         <a-setting-list-item paddings="small">
             <template #title>Enable LDAP sync</template>
             <template #control>

@@ -152,13 +152,22 @@ func (s *SubJsonService) getConfig(inbound *model.Inbound, client model.Client, 
 	var newJsonArray []json_util.RawMessage
 	stream := s.streamData(inbound.StreamSettings)
 
+	// Resolve effective address and port (proxy chain overrides)
+	effectiveHost := host
+	effectivePort := inbound.Port
+	if s.SubService != nil {
+		resolvedAddr, resolvedPort := s.SubService.resolveAddressAndPort(inbound)
+		effectiveHost = resolvedAddr
+		effectivePort = resolvedPort
+	}
+
 	externalProxies, ok := stream["externalProxy"].([]any)
 	if !ok || len(externalProxies) == 0 {
 		externalProxies = []any{
 			map[string]any{
 				"forceTls": "same",
-				"dest":     host,
-				"port":     float64(inbound.Port),
+				"dest":     effectiveHost,
+				"port":     float64(effectivePort),
 				"remark":   "",
 			},
 		}

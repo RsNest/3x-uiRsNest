@@ -161,6 +161,26 @@ func (s *SubService) getFallbackMaster(dest string, streamSettings string) (stri
 	return inbound.Listen, inbound.Port, string(modifiedStream), nil
 }
 
+// resolveAddressAndPort returns the effective address and port for client configs.
+// If proxy chain mode is enabled, it returns the proxy server address/port.
+// Otherwise it returns the original inbound address and port.
+func (s *SubService) resolveAddressAndPort(inbound *model.Inbound) (string, int) {
+	proxyEnabled, err := s.settingService.GetProxyChainEnable()
+	if err == nil && proxyEnabled {
+		proxyAddr, addrErr := s.settingService.GetProxyChainAddress()
+		proxyPort, portErr := s.settingService.GetProxyChainPort()
+		if addrErr == nil && portErr == nil && proxyAddr != "" && proxyPort > 0 {
+			return proxyAddr, proxyPort
+		}
+	}
+	// Default behavior: use host address or inbound listen
+	address := s.address
+	if inbound.Listen != "" && inbound.Listen != "0.0.0.0" && inbound.Listen != "::" && inbound.Listen != "::0" {
+		address = inbound.Listen
+	}
+	return address, inbound.Port
+}
+
 func (s *SubService) getLink(inbound *model.Inbound, email string) string {
 	switch inbound.Protocol {
 	case "vmess":
@@ -179,16 +199,11 @@ func (s *SubService) genVmessLink(inbound *model.Inbound, email string) string {
 	if inbound.Protocol != model.VMESS {
 		return ""
 	}
-	var address string
-	if inbound.Listen == "" || inbound.Listen == "0.0.0.0" || inbound.Listen == "::" || inbound.Listen == "::0" {
-		address = s.address
-	} else {
-		address = inbound.Listen
-	}
+	address, port := s.resolveAddressAndPort(inbound)
 	obj := map[string]any{
 		"v":    "2",
 		"add":  address,
-		"port": inbound.Port,
+		"port": port,
 		"type": "none",
 	}
 	var stream map[string]any
@@ -320,16 +335,10 @@ func (s *SubService) genVmessLink(inbound *model.Inbound, email string) string {
 }
 
 func (s *SubService) genVlessLink(inbound *model.Inbound, email string) string {
-	var address string
-	if inbound.Listen == "" || inbound.Listen == "0.0.0.0" || inbound.Listen == "::" || inbound.Listen == "::0" {
-		address = s.address
-	} else {
-		address = inbound.Listen
-	}
-
 	if inbound.Protocol != model.VLESS {
 		return ""
 	}
+	address, port := s.resolveAddressAndPort(inbound)
 	var stream map[string]any
 	json.Unmarshal([]byte(inbound.StreamSettings), &stream)
 	clients, _ := s.inboundService.GetClients(inbound)
@@ -341,7 +350,6 @@ func (s *SubService) genVlessLink(inbound *model.Inbound, email string) string {
 		}
 	}
 	uuid := clients[clientIndex].ID
-	port := inbound.Port
 	streamNetwork := stream["network"].(string)
 	params := make(map[string]string)
 	params["type"] = streamNetwork
@@ -524,15 +532,10 @@ func (s *SubService) genVlessLink(inbound *model.Inbound, email string) string {
 }
 
 func (s *SubService) genTrojanLink(inbound *model.Inbound, email string) string {
-	var address string
-	if inbound.Listen == "" || inbound.Listen == "0.0.0.0" || inbound.Listen == "::" || inbound.Listen == "::0" {
-		address = s.address
-	} else {
-		address = inbound.Listen
-	}
 	if inbound.Protocol != model.Trojan {
 		return ""
 	}
+	address, port := s.resolveAddressAndPort(inbound)
 	var stream map[string]any
 	json.Unmarshal([]byte(inbound.StreamSettings), &stream)
 	clients, _ := s.inboundService.GetClients(inbound)
@@ -544,7 +547,6 @@ func (s *SubService) genTrojanLink(inbound *model.Inbound, email string) string 
 		}
 	}
 	password := clients[clientIndex].Password
-	port := inbound.Port
 	streamNetwork := stream["network"].(string)
 	params := make(map[string]string)
 	params["type"] = streamNetwork
@@ -720,15 +722,10 @@ func (s *SubService) genTrojanLink(inbound *model.Inbound, email string) string 
 }
 
 func (s *SubService) genShadowsocksLink(inbound *model.Inbound, email string) string {
-	var address string
-	if inbound.Listen == "" || inbound.Listen == "0.0.0.0" || inbound.Listen == "::" || inbound.Listen == "::0" {
-		address = s.address
-	} else {
-		address = inbound.Listen
-	}
 	if inbound.Protocol != model.Shadowsocks {
 		return ""
 	}
+	address, port := s.resolveAddressAndPort(inbound)
 	var stream map[string]any
 	json.Unmarshal([]byte(inbound.StreamSettings), &stream)
 	clients, _ := s.inboundService.GetClients(inbound)
@@ -870,7 +867,7 @@ func (s *SubService) genShadowsocksLink(inbound *model.Inbound, email string) st
 		return links
 	}
 
-	link := fmt.Sprintf("ss://%s@%s:%d", base64.StdEncoding.EncodeToString([]byte(encPart)), address, inbound.Port)
+	link := fmt.Sprintf("ss://%s@%s:%d", base64.StdEncoding.EncodeToString([]byte(encPart)), address, port)
 	url, _ := url.Parse(link)
 	q := url.Query()
 

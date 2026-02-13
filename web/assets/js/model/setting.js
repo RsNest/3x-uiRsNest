@@ -55,6 +55,13 @@ class AllSetting {
 
         this.timeLocation = "Local";
 
+        // Proxy chain settings
+        this.proxyChainEnable = false;
+        this.proxyChainAddress = "";
+        this.proxyChainPort = 443;
+        this.proxyChainOriginalAddress = "";
+        this.proxyChainOriginalPort = 443;
+
         // LDAP settings
         this.ldapEnable = false;
         this.ldapHost = "";

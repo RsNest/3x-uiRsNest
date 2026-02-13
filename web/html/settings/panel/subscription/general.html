@@ -1,4 +1,9 @@
 {{define "settings/panel/subscription/general"}}
+<a-alert v-if="allSetting.proxyChainEnable" type="info" show-icon :style="{ marginBottom: '12px' }">
+    <template slot="message">
+        <b>Proxy Chain Active</b> — Client configs will contain address <b>[[ allSetting.proxyChainAddress ]]:[[ allSetting.proxyChainPort ]]</b> instead of this server's address
+    </template>
+</a-alert>
 <a-collapse default-active-key="1">
     <a-collapse-panel key="1" header='{{ i18n "pages.xray.generalConfigs"}}'>
         <a-setting-list-item paddings="small">

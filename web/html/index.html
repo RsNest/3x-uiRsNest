@@ -13,6 +13,13 @@
           </a-alert>
         </transition>
         <transition name="list" appear>
+          <a-alert type="info" v-if="proxyChain.enabled && loadingStates.fetched" class="mb-10" show-icon closable>
+            <template slot="message">
+              <b>Proxy Chain Mode: ENABLED</b> — Clients connect to <b>[[ proxyChain.address ]]:[[ proxyChain.port ]]</b>
+            </template>
+          </a-alert>
+        </transition>
+        <transition name="list" appear>
           <template>
             <a-row v-if="!loadingStates.fetched">
               <a-card class="card-placeholder text-center">
@@ -895,6 +902,11 @@
       showAlert: false,
       showIp: false,
       ipLimitEnable: false,
+      proxyChain: {
+        enabled: false,
+        address: '',
+        port: 443,
+      },
     },
     methods: {
       loading(spinning, tip = '{{ i18n "loading"}}') {
@@ -1125,6 +1137,11 @@
       const msg = await HttpUtil.post('/panel/setting/defaultSettings');
       if (msg.success) {
         this.ipLimitEnable = msg.obj.ipLimitEnable;
+        if (msg.obj.proxyChainEnable) {
+          this.proxyChain.enabled = true;
+          this.proxyChain.address = msg.obj.proxyChainAddress || '';
+          this.proxyChain.port = msg.obj.proxyChainPort || 443;
+        }
       }
 
       // Initial status fetch
